@@ -1,4 +1,6 @@
 ﻿
+using System.Text;
+
 public enum CellState
 {
     Empty,
@@ -7,8 +9,9 @@ public enum CellState
     Hited
 }
 
-public enum ShootResult
+public enum ShootState
 {
+    Shooting,
     Hitting,
     Missing
 }
@@ -42,7 +45,7 @@ public class Field
     }
 }
 
-public class RandomPointGenerator()
+public class RandomPointGenerator
 {
     private Random _random = new Random();
     public (int X, int Y) GetRandomPoint(int fieldHeight, int fieldWidth)
@@ -131,43 +134,70 @@ public class ShipPlacer
 
 public class FieldRender
 {
-    public void Draw(Field field)
+    public void DrawFieldsWithLabels(Field enemyField, Field playerField)
     {
-        for (int i = 0; i < field.Height; i++)
-        {
-            for (int j = 0; j < field.Width; j++)
-            {
-                Console.Write(GetSymbole(field.Map[i, j]));
-            }
+        string rowLabels = "  1 2 3 4 5 6 7 8 9";
+        string header = "  EnemyField".PadRight(24) + "  YourField";
 
-            Console.WriteLine();
+        Console.WriteLine(header);
+        Console.WriteLine(rowLabels.PadRight(24) + rowLabels);
+
+        for (int i = 0; i < enemyField.Height; i++)
+        {
+            char columnLabel = (char)('A' + i); 
+
+            string enemyRow = GetRowWithLabels(enemyField.Map, i, columnLabel, isEnemy: true);
+            string playerRow = GetRowWithLabels(playerField.Map, i, columnLabel, isEnemy: false);
+
+            Console.WriteLine(enemyRow.PadRight(24) + playerRow);
         }
     }
 
-    private char GetSymbole(CellState cell) => cell switch
+    private string GetRowWithLabels(CellState[,] field, int rowIndex, char label, bool isEnemy)
     {
+        StringBuilder row = new StringBuilder();
+        row.Append(label + " "); 
+
+        for (int j = 0; j < field.GetLength(1); j++)
+        {
+            row.Append(GetSymbole(field[rowIndex, j], isEnemy) + " ");
+        }
+
+        return row.ToString();
+    }
+
+    private char GetSymbole(CellState cell, bool isEnemy) => cell switch
+    {
+        CellState.HasShip when isEnemy => '.', 
         CellState.Empty => '.',
-        CellState.HasShip => 'S',
         CellState.Missed => '~',
-        CellState.Hited => 'x'
+        CellState.Hited => 'x',
+        CellState.HasShip => 'S', 
+        _ => ' '
     };
+
 }
 
 class SeaBattle
 {
-    static int width = 20;
-    static int height = 12;
+    static int width = 9;
+    static int height = 9;
 
     static Field playerField = new Field(width,height);
 
     static Field botField = new Field(width, height);
 
-    static List<int> ships = new List<int>{4, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
+    static List<int> playerShips = new List<int>{ 4, 4, 4, 3, 3, 2, 2, 1, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
+    static List<int> enemyShips = new List<int> { 4, 4, 4, 3, 3, 2, 2, 1, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
 
     static ShipPlacer shipPlacer = new ShipPlacer();
     static FieldRender fieldRender = new FieldRender();
+    static RandomPointGenerator pointGenerator = new RandomPointGenerator();
 
     static (int x, int y) shootPoint = (0, 0);
+
+    static int playerHP = playerShips.Sum();
+    static int enemyHP = enemyShips.Sum();
 
 
 
@@ -179,10 +209,61 @@ class SeaBattle
     static void GameProcess()
     {
         GenerationProcess();
-        fieldRender.Draw(playerField);
-        fieldRender.Draw(botField);
+        Draw();
+
+        while (!IsEndGame())
+        {
+            GetInput();
+            Logic();
+            Draw();
+        }
+
+        EndGame();
     }
 
+    static void EndGame()
+    {
+        Console.WriteLine("Гру завершено!" + "Кількість палуб ,що залишилась:" + "Ворог:" + enemyHP +"Ви:" + playerHP);
+    }
+
+    static void PlayerLogic()
+    {
+        ShootState shootState = ShootState.Shooting;
+
+        while(shootState != ShootState.Missing)
+        {
+            if (shootState == ShootState.Hitting)
+                enemyHP--;
+            if (shootPoint.x == -1 || shootPoint.y == -1)
+            {
+                return;
+            }
+            shootState = GetShootState(shootPoint,botField.Map);
+        }
+    }
+
+    static void BotLogic()
+    {
+        ShootState shootState = ShootState.Shooting;
+
+        while (shootState != ShootState.Missing)
+        {
+            if (shootState == ShootState.Hitting)
+                playerHP--;
+            (int x,int y) botShootPoint = pointGenerator.GetRandomPoint(height,width);
+            shootState = GetShootState(botShootPoint, playerField.Map);
+        }
+    }
+
+    static void Logic()
+    {
+        PlayerLogic();
+        BotLogic();
+    }
+    static void Draw()
+    {
+        fieldRender.DrawFieldsWithLabels(botField, playerField);
+    }
 
     static void GenerateFields()
     {
@@ -192,15 +273,20 @@ class SeaBattle
 
     static void PlaceAllPlayersShips()
     {
-        shipPlacer.PlaceShips(playerField,ships);
-        shipPlacer.PlaceShips(botField, ships);
+        shipPlacer.PlaceShips(playerField,playerShips);
+        shipPlacer.PlaceShips(botField, enemyShips);
     }
+
     static void GenerationProcess()
     {
         GenerateFields();
         PlaceAllPlayersShips();
     }
 
+    static bool IsEndGame()
+    {
+        return playerHP == 0 || enemyHP == 0; 
+    }
     static void GetInput()
     {
         string input = Console.ReadLine();
@@ -208,10 +294,10 @@ class SeaBattle
         if (input.Length != 2)
             return;
 
-        shootPoint.x = GetColumnIndex(input[0]);
         shootPoint.y = GetRowIndex(input[1]);
+        shootPoint.x = GetColumnIndex(input[0]);
 
-        if(shootPoint.x == -1 || shootPoint.y == -1)
+        if (shootPoint.x == -1 || shootPoint.y == -1)
         {
             return;
         }
@@ -228,6 +314,9 @@ class SeaBattle
             'E' => 4,
             'F' => 5,
             'G' => 6,
+            'H' => 7,
+            'I' => 8,
+            'J' => 9,
             _ => -1
         };
     }
@@ -243,24 +332,26 @@ class SeaBattle
             '5' => 4,
             '6' => 5,
             '7' => 6,
+            '8' => 7,
+            '9' => 8,
             _ => -1
         };
     }
 
-    static ShootResult Shoot((int x,int y) point, CellState[,] cells)
+    static ShootState GetShootState((int x,int y) point, CellState[,] cells)
     {
-        ShootResult result = ShootResult.Missing;
+        ShootState result = ShootState.Missing;
         CellState cell = cells[point.x, point.y];
 
         if (cell == CellState.Empty)
         {
             cells[point.x, point.y] = CellState.Missed;
-            result = ShootResult.Missing;
+            result = ShootState.Missing;
         }
         else if(cell == CellState.HasShip)
         {
             cells[point.x, point.y] = CellState.Hited;
-            result = ShootResult.Hitting;
+            result = ShootState.Hitting;
         }
 
         return result;
