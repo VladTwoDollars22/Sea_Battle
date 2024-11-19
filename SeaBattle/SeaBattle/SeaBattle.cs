@@ -213,7 +213,7 @@ class SeaBattle
 
         while (!IsEndGame())
         {
-            GetInput();
+            InputProcess();
             Logic();
             Draw();
         }
@@ -287,7 +287,7 @@ class SeaBattle
     {
         return playerHP == 0 || enemyHP == 0; 
     }
-    static void GetInput()
+    static void InputProcess()
     {
         string input = Console.ReadLine();
 
