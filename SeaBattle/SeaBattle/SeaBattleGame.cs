@@ -88,6 +88,11 @@ class SeaBattleGame
                 defender = temp;
 
                 swapsCount++;
+
+                if (swapsCount == 3)
+                {
+                    break;
+                }
             }
             else
             {
