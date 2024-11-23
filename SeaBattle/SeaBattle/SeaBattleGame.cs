@@ -20,8 +20,6 @@ class SeaBattleGame
     private ShipPlacer shipPlacer = new ShipPlacer();
     private FieldRender fieldRender = new FieldRender();
     private RandomPointGenerator pointGenerator = new RandomPointGenerator();
-
-    private bool isPlayer1Turn = true;
     public void GameProcess()
     {
         GenerationProcess();
