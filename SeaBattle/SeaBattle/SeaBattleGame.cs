@@ -1,5 +1,4 @@
-﻿using System.Text;
-using SeaBattle;
+﻿using SeaBattle;
 public enum CellState
 {
     Empty,
@@ -10,89 +9,10 @@ public enum CellState
 
 public enum ShootState
 {
-    Hitting,
     Missing,
+    Hitting,
+    Repeating,
 }
-
-public class Field
-{
-    public int Width { get; private set; }
-    public int Height { get; private set; }
-    public CellState[,] Map;
-
-    public Field(int width, int height)
-    {
-        Width = width;
-        Height = height;
-        Map = new CellState[height, width];
-    }
-
-    public CellState[,] GenerateField()
-    {
-        Map = new CellState[Height, Width];
-
-        for (int i = 0; i < Height; i++)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-                Map[i, j] = CellState.Empty;
-            }
-        }
-
-        return Map;
-    }
-}
-
-
-
-public class FieldRender
-{
-    public void DrawFieldsWithLabels(Field enemyField, Field playerField)
-    {
-        Console.Clear();
-
-        string rowLabels = "  1 2 3 4 5 6 7 8 9";
-        string header = "  EnemyField".PadRight(24) + "  YourField";
-
-        Console.WriteLine(header);
-        Console.WriteLine(rowLabels.PadRight(24) + rowLabels);
-
-        for (int i = 0; i < enemyField.Height; i++)
-        {
-            char columnLabel = (char)('A' + i); 
-
-            string enemyRow = GetRowWithLabels(enemyField.Map, i, columnLabel, isEnemy: true);
-            string playerRow = GetRowWithLabels(playerField.Map, i, columnLabel, isEnemy: false);
-
-            Console.WriteLine(enemyRow.PadRight(24) + playerRow);
-        }
-    }
-
-    private string GetRowWithLabels(CellState[,] field, int rowIndex, char label, bool isEnemy)
-    {
-        StringBuilder row = new StringBuilder();
-        row.Append(label + " "); 
-
-        for (int j = 0; j < field.GetLength(1); j++)
-        {
-            row.Append(GetSymbole(field[rowIndex, j], isEnemy) + " ");
-        }
-
-        return row.ToString();
-    }
-
-    private char GetSymbole(CellState cell, bool isEnemy) => cell switch
-    {
-        CellState.HasShip when isEnemy => '.', 
-        CellState.Empty => '.',
-        CellState.Missed => '~',
-        CellState.Hited => 'x',
-        CellState.HasShip => 'S', 
-        _ => ' '
-    };
-
-}
-
 class SeaBattleGame   
 {
     private Player _player1 = new Player();
@@ -102,7 +22,7 @@ class SeaBattleGame
     private FieldRender fieldRender = new FieldRender();
     private RandomPointGenerator pointGenerator = new RandomPointGenerator();
 
-    private (int x, int y) shootPoint = (0, 0);
+    private bool isPlayer1Turn = true;
     static void Main(string[] args)
     {
         SeaBattleGame game = new SeaBattleGame();
@@ -116,9 +36,7 @@ class SeaBattleGame
 
         while (!IsEndGame())
         {
-            InputProcess();
             Logic();
-            Draw();
         }
 
         EndGame();
@@ -128,36 +46,59 @@ class SeaBattleGame
     {
         Console.WriteLine("Гру завершено!" + "Кількість палуб ,що залишилась:" + "Гравець один:" + _player1.HP +"Гравець два:" + _player2.HP);
     }
-
-    private void Shoot(Player defender)
+    private void ShootLogic()
     {
-        while (GetShootState(shootPoint, defender.field) != ShootState.Missing)
+        int swapsCount = 0;
+        Player attacker = _player1;
+        Player defender = _player2;
+
+        while (true)
         {
-            defender.HP--;
+            Console.WriteLine($"Хід Гравця {(attacker == _player1 ? "1" : "2")}. Введіть координати (наприклад, A1):");
+            (int x, int y) = GetInput();
 
-            defender.field.Map[shootPoint.x,shootPoint.y] = CellState.Hited;
+            if (x == -1 || y == -1)
+            {
+                Console.WriteLine("Некоректні дані спробуйте вести знову");
+                continue;
+            }
 
-            InputProcess();
+            ShootState state = GetShootState((x, y), defender.field);
+
+            if (state == ShootState.Hitting)
+            {
+                Console.WriteLine("Попали!");
+                defender.HP--;
+                defender.field.Map[x, y] = CellState.Hited;
+            }
+
+            else if (state == ShootState.Missing)
+            {
+                Console.WriteLine("Промазали!");
+                defender.field.Map[x, y] = CellState.Missed;
+
+                Player temp = attacker;
+                attacker = defender;
+                defender = temp;
+
+                swapsCount++;
+            }
+            else
+            {
+                Console.WriteLine("Сюди ви вже стріляли. Спробуйте знову.");
+                continue;
+            }
+
+            fieldRender.DrawField(attacker.field,defender.field);
         }
-
-        if((GetShootState(shootPoint, defender.field) != ShootState.Missing))
-        {
-            defender.field.Map[shootPoint.x, shootPoint.y] = CellState.Missed;
-        }
-    }
-
-    private void ShotLogic()
-    {
-        Shoot(_player2);
-        Shoot(_player1);
     }
     private void Logic()
     {
-        ShotLogic();
+        ShootLogic();
     }
     private void Draw()
     {
-        fieldRender.DrawFieldsWithLabels(_player1.field, _player2.field);
+        fieldRender.DrawField(_player1.field, _player2.field);
     }
 
     private void GenerateFields()
@@ -182,43 +123,41 @@ class SeaBattleGame
     {
         return _player1.HP == 0 || _player2.HP == 0; 
     }
-    private void InputProcess()
+    private (int,int) GetInput()
     {
         string input = Console.ReadLine();
 
         if (input.Length != 2)
-            return;
+            return (-1,-1);
 
-        shootPoint.y = GetIndex(input[1]);
-        shootPoint.x = GetIndex(input[0]);
+        return (GetIndex(input[0]), GetIndex(input[1]));
     }
 
     private int GetIndex(char inputChar)
     {
-        if (inputChar >= 'A' && inputChar <= 'J')
+        if (inputChar >= 'A' && inputChar <= 'I')
             return inputChar - 'A';
         if (inputChar >= '1' && inputChar <= '9') 
             return inputChar - '1';
         return -1; 
     }
 
-    private ShootState GetShootState((int x,int y) point, Field field)
+    static ShootState GetShootState((int x, int y) point, Field field)
     {
-        if (shootPoint.x == -1 || shootPoint.y == -1)
-        {
-            return ShootState.Missing;
-        }
-
-        ShootState result = ShootState.Missing;
+        ShootState result;
         CellState cell = field.Map[point.x, point.y];
 
         if (cell == CellState.Empty)
         {
             result = ShootState.Missing;
         }
-        else if(cell == CellState.HasShip)
+        else if (cell == CellState.HasShip)
         {
             result = ShootState.Hitting;
+        }
+        else
+        {
+            result = ShootState.Repeating;
         }
 
         return result;

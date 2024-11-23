@@ -13,7 +13,7 @@
 
             field = new Field(9, 9);
 
-            ships = new List<int> { 4, 3, 2, 2, 1, 1 };
+            ships = new List<int> { 4, 3 , 3, 2, 2, 2, 1, 1, 1, 1 };
 
             HP = ships.Sum();
         }
