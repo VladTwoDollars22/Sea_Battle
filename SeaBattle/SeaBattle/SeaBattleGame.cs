@@ -60,12 +60,10 @@ class SeaBattleGame
 
         while (true)
         {
-            Console.WriteLine($"Хід Гравця {(attacker == _player1 ? "1" : "2")}. Введіть координати (наприклад, A1):");
             (int x, int y) = GetInput();
 
             if (x == -1 || y == -1)
             {
-                Console.WriteLine("Некоректні дані спробуйте вести знову");
                 continue;
             }
 
@@ -73,14 +71,12 @@ class SeaBattleGame
 
             if (state == ShootState.Hitting)
             {
-                Console.WriteLine("Попали!");
                 defender.HP--;
                 defender.field.Map[x, y] = CellState.Hited;
             }
 
             else if (state == ShootState.Missing)
             {
-                Console.WriteLine("Промазали!");
                 defender.field.Map[x, y] = CellState.Missed;
 
                 Player temp = attacker;
@@ -96,7 +92,6 @@ class SeaBattleGame
             }
             else
             {
-                Console.WriteLine("Сюди ви вже стріляли. Спробуйте знову.");
                 continue;
             }
 
