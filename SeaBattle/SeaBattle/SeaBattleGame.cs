@@ -6,7 +6,6 @@ public enum CellState
     Missed,
     Hited,
 }
-
 public enum ShootState
 {
     Missing,
@@ -23,13 +22,7 @@ class SeaBattleGame
     private RandomPointGenerator pointGenerator = new RandomPointGenerator();
 
     private bool isPlayer1Turn = true;
-    static void Main(string[] args)
-    {
-        SeaBattleGame game = new SeaBattleGame();
-        game.GameProcess();
-    }
-
-    private void GameProcess()
+    public void GameProcess()
     {
         GenerationProcess();
         Draw();
@@ -41,11 +34,24 @@ class SeaBattleGame
 
         EndGame();
     }
-
-    private void EndGame()
+    private void GenerationProcess()
     {
-        Console.WriteLine("Гру завершено!" + "Кількість палуб ,що залишилась:" + "Гравець один:" + _player1.HP +"Гравець два:" + _player2.HP);
+        GenerateFields();
+        PlaceAllPlayersShips();
     }
+    private void Draw()
+    {
+        fieldRender.DrawField(_player1.field, _player2.field);
+    }
+    private bool IsEndGame()
+    {
+        return _player1.HP == 0 || _player2.HP == 0;
+    }
+    private void Logic()
+    {
+        ShootLogic();
+    }
+
     private void ShootLogic()
     {
         int swapsCount = 0;
@@ -92,14 +98,11 @@ class SeaBattleGame
             fieldRender.DrawField(attacker.field,defender.field);
         }
     }
-    private void Logic()
+    private void EndGame()
     {
-        ShootLogic();
+        Console.WriteLine("Гру завершено!" + "Кількість палуб ,що залишилась:" + "Гравець один:" + _player1.HP + "Гравець два:" + _player2.HP);
     }
-    private void Draw()
-    {
-        fieldRender.DrawField(_player1.field, _player2.field);
-    }
+
 
     private void GenerateFields()
     {
@@ -113,16 +116,8 @@ class SeaBattleGame
         shipPlacer.PlaceShips(_player2.field,_player2.ships);
     }
 
-    private void GenerationProcess()
-    {
-        GenerateFields();
-        PlaceAllPlayersShips();
-    }
 
-    private bool IsEndGame()
-    {
-        return _player1.HP == 0 || _player2.HP == 0; 
-    }
+
     private (int,int) GetInput()
     {
         string input = Console.ReadLine();
