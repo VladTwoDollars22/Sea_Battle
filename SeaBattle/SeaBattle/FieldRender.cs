@@ -2,9 +2,9 @@
 
 namespace SeaBattle
 {
-    public class FieldRender
+    static class FieldRender
     {
-        public void DrawField(Field attackerField, Field defenderField)
+        public static void DrawField(Field attackerField, Field defenderField)
         {
             string rowLabels = "  1 2 3 4 5 6 7 8 9";
             string header = "  attacker's Field".PadRight(24) + "  defender's Field";
@@ -25,7 +25,7 @@ namespace SeaBattle
             }
         }
 
-        private string GetRowWithLabels(CellState[,] field, int rowIndex, char label, bool isDefender)
+        static string GetRowWithLabels(CellState[,] field, int rowIndex, char label, bool isDefender)
         {
             StringBuilder row = new StringBuilder();
             row.Append(label + " ");
@@ -37,7 +37,7 @@ namespace SeaBattle
 
             return row.ToString();
         }
-        private char GetSymbole(CellState cell, bool isDefender)
+        static char GetSymbole(CellState cell, bool isDefender)
         {
             return cell switch
             {

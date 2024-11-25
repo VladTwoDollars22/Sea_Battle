@@ -17,9 +17,19 @@ class SeaBattleGame
     private Player _player1 = new Player();
     private Player _player2 = new Player();
 
-    private ShipPlacer shipPlacer = new ShipPlacer();
-    private FieldRender fieldRender = new FieldRender();
-    private RandomPointGenerator pointGenerator = new RandomPointGenerator();
+    private (int x, int y) _actionPoint;
+
+    private Player _attacker;
+    private Player _defender;
+
+    private int _transitionTime = 250;
+
+    public SeaBattleGame()
+    {
+        _attacker = _player1;
+        _defender = _player2;
+        _player2.isBot = true;
+    }
     public void GameProcess()
     {
         GenerationProcess();
@@ -27,7 +37,9 @@ class SeaBattleGame
 
         while (!IsEndGame())
         {
+            InputProcess();
             Logic();
+            Draw();
         }
 
         EndGame();
@@ -35,11 +47,15 @@ class SeaBattleGame
     private void GenerationProcess()
     {
         GenerateFields();
-        PlaceAllPlayersShips();
+    }
+    private void GenerateFields()
+    {
+        _player1.field.GenerateField(_player1.ships);
+        _player2.field.GenerateField(_player2.ships);
     }
     private void Draw()
     {
-        fieldRender.DrawField(_player1.field, _player2.field);
+        FieldRender.DrawField(_attacker.field, _defender.field);
     }
     private bool IsEndGame()
     {
@@ -49,79 +65,55 @@ class SeaBattleGame
     {
         ShootLogic();
     }
-
     private void ShootLogic()
     {
-        int swapsCount = 0;
-        Player attacker = _player1;
-        Player defender = _player2;
+        if (_actionPoint.x == -1 || _actionPoint.y == -1)
+            return;
 
-        while (true)
+        Field defenderField = _defender.field;
+        ShootState shootState = defenderField.GetShootState(_actionPoint);
+
+        CellState newState;
+
+        if (shootState == ShootState.Hitting)
         {
-            (int x, int y) = GetInput();
+            newState = CellState.Hited;
+            defenderField.EditCell(_actionPoint, newState);
 
-            if (x == -1 || y == -1)
-            {
-                continue;
-            }
+            _defender.TakeDamage(1);
+        }
+        else if (shootState == ShootState.Missing)
+        {
+            newState = CellState.Missed;
+            defenderField.EditCell(_actionPoint, newState);
 
-            ShootState state = GetShootState((x, y), defender.field);
+            TurnTransition();
 
-            if (state == ShootState.Hitting)
-            {
-                defender.HP--;
-                defender.field.Map[x, y] = CellState.Hited;
-            }
-
-            else if (state == ShootState.Missing)
-            {
-                defender.field.Map[x, y] = CellState.Missed;
-
-                Player temp = attacker;
-                attacker = defender;
-                defender = temp;
-
-                swapsCount++;
-
-                if (swapsCount == 3)
-                {
-                    break;
-                }
-            }
-            else
-            {
-                continue;
-            }
-
-            fieldRender.DrawField(attacker.field,defender.field);
+           (_defender, _attacker) = (_attacker, _defender);
         }
     }
     private void EndGame()
     {
         Console.WriteLine("Гру завершено!" + "Кількість палуб ,що залишилась:" + "Гравець один:" + _player1.HP + "Гравець два:" + _player2.HP);
     }
-
-
-    private void GenerateFields()
+    private void InputProcess()
     {
-        _player1.field.GenerateField();
-        _player2.field.GenerateField();
+        if(_attacker.isBot == false)
+        {
+            _actionPoint = GetInput();
+        }
+        else
+        {
+            _actionPoint = _defender.field.GetRandomPoint();
+        }
     }
-
-    private void PlaceAllPlayersShips()
-    {
-        shipPlacer.PlaceShips(_player1.field,_player1.ships);
-        shipPlacer.PlaceShips(_player2.field,_player2.ships);
-    }
-
-
 
     private (int,int) GetInput()
     {
         string input = Console.ReadLine();
 
         if (input.Length != 2)
-            return (-1,-1);
+            return (-1, -1);
 
         return (GetIndex(input[0]), GetIndex(input[1]));
     }
@@ -135,25 +127,13 @@ class SeaBattleGame
         return -1; 
     }
 
-    static ShootState GetShootState((int x, int y) point, Field field)
+    private void TurnTransition()
     {
-        ShootState result;
-        CellState cell = field.Map[point.x, point.y];
-
-        if (cell == CellState.Empty)
+        for(int i = 1;i <= 3; i++)
         {
-            result = ShootState.Missing;
+            Console.Write(".");
+            Thread.Sleep(_transitionTime);
         }
-        else if (cell == CellState.HasShip)
-        {
-            result = ShootState.Hitting;
-        }
-        else
-        {
-            result = ShootState.Repeating;
-        }
-
-        return result;
     }
 }
 
