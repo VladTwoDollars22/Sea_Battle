@@ -17,22 +17,23 @@ namespace SeaBattle
             {
                 char columnLabel = (char)('A' + i);
 
-                string attackerRow = GetRowWithLabels(attackerField.Map, i, columnLabel, isDefender: false);
+                string attackerRow = GetRowWithLabels(attackerField, i, columnLabel, isDefender: false);
 
-                string defenderRow = GetRowWithLabels(defenderField.Map, i, columnLabel, isDefender: true);
+                string defenderRow = GetRowWithLabels(defenderField, i, columnLabel, isDefender: true);
 
                 Console.WriteLine(attackerRow.PadRight(24) + defenderRow);
             }
         }
 
-        static string GetRowWithLabels(CellState[,] field, int rowIndex, char label, bool isDefender)
+        static string GetRowWithLabels(Field field, int rowIndex, char label, bool isDefender)
         {
             StringBuilder row = new StringBuilder();
             row.Append(label + " ");
 
-            for (int j = 0; j < field.GetLength(1); j++)
+            for (int j = 0; j < field.GetMapLength(); j++)
             {
-                row.Append(GetSymbole(field[rowIndex, j], isDefender) + " ");  
+                CellState cell = field.GetCell(rowIndex, j);
+                row.Append(GetSymbole(cell, isDefender) + " ");  
             }
 
             return row.ToString();

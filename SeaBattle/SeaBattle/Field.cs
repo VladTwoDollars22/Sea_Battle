@@ -5,7 +5,9 @@
         private Random _random = new Random();
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public CellState[,] Map { get; private set; }
+        private CellState[,] Map;
+
+        private bool placed;
 
         public void GenerateField(List<int> ships)
         {
@@ -38,20 +40,32 @@
         {
             foreach (var shipLength in ships)
             {
-                bool placed = false;
+                placed = false;
+                int iteration = 0;
 
                 while (!placed)
                 {
-                    CellState[,] map = Map;
-                    var mainShipPoint = GetRandomPoint();
-                    int randomAxis = _random.Next(0, 2);
+                    if (iteration > 10000)
+                        Console.Error.WriteLine("неможливо розмістити всі кораблі");
+                    else
+                        iteration++;
 
-                    if (CanPlaceShip(mainShipPoint, shipLength, randomAxis))
-                    {
-                        PlaceShip(mainShipPoint, shipLength, randomAxis);
-                        placed = true;
-                    }
+                    CellState[,] map = Map;
+                    var mainPoint = GetRandomPoint();
+                    int axis = _random.Next(0, 2);
+
+                    TryPlaceShip(mainPoint, shipLength, axis);
+
                 }
+            }
+        }
+        private void TryPlaceShip((int X, int Y) mainPoint, int shipLength, int axis)
+        {
+            if (CanPlaceShip(mainPoint, shipLength, axis))
+            {
+                PlaceShip(mainPoint, shipLength, axis);
+
+                placed = true;
             }
         }
         private bool CanPlaceShip((int X, int Y) mainPoint, int shipLength, int axis)
@@ -124,6 +138,16 @@
             int y = _random.Next(0, Width);
 
             return (x, y);
+        }
+
+        public CellState GetCell(int x,int y)
+        {
+            return Map[x, y];
+        }
+
+        public int GetMapLength()
+        {
+            return Map.GetLength(1);
         }
     }
 }

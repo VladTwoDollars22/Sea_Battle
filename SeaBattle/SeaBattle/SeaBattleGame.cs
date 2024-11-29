@@ -12,6 +12,12 @@ public enum ShootState
     Hitting,
     Repeating,
 }
+public enum GameMode
+{
+    PVP,
+    PVE,
+    EVE,
+}
 class SeaBattleGame   
 {
     private Player _player1 = new Player();
@@ -26,12 +32,12 @@ class SeaBattleGame
 
     public SeaBattleGame()
     {
-        _attacker = _player1;
-        _defender = _player2;
+
         _player2.isBot = true;
     }
     public void GameProcess()
     {
+        Start();
         GenerationProcess();
         Draw();
 
@@ -43,6 +49,16 @@ class SeaBattleGame
         }
 
         EndGame();
+    }
+    private void Start()
+    {
+        SetRoles();
+        SetGameMode(GameMode.PVP);
+    }
+    private void SetRoles()
+    {
+        _attacker = _player1;
+        _defender = _player2;
     }
     private void GenerationProcess()
     {
@@ -87,7 +103,7 @@ class SeaBattleGame
             newState = CellState.Missed;
             defenderField.EditCell(_actionPoint, newState);
 
-            TurnTransition();
+            TurnTransitionVisual();
 
            (_defender, _attacker) = (_attacker, _defender);
         }
@@ -127,12 +143,31 @@ class SeaBattleGame
         return -1; 
     }
 
-    private void TurnTransition()
+    private void TurnTransitionVisual()
     {
         for(int i = 1;i <= 3; i++)
         {
             Console.Write(".");
             Thread.Sleep(_transitionTime);
+        }
+    }
+
+    private void SetGameMode(GameMode mode)
+    {
+        switch (mode)
+        {
+            case GameMode.PVP:
+                _player1.isBot = false;
+                _player2.isBot = false;
+                break;
+            case GameMode.PVE:
+                _player1.isBot = false;
+                _player2.isBot = true;
+                break;
+            default:
+                _player1.isBot = true;
+                _player2.isBot = true;
+                break;
         }
     }
 }
