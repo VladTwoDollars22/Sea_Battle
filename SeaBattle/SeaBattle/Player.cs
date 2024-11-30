@@ -5,6 +5,7 @@
         public bool isBot;
         public Field field;
         public List<int> ships;
+        public int radarsCount = 1;
         public int HP { get; private set; }
 
         public Player(bool isBot = false)
@@ -21,6 +22,11 @@
         public void TakeDamage(int damage)
         {
             HP -= damage;
+        }
+
+        public void UseRadar()
+        {
+            radarsCount--;
         }
     }
 }
