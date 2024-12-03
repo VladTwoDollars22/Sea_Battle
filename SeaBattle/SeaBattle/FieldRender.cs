@@ -4,76 +4,69 @@ namespace SeaBattle
 {
     static class FieldRender
     {
-        public static void DrawField(Field attackerField, Field defenderField,(int x,int y) visibleAreaPoint,(int width,int heigth) visibleArea)
+        public static void DrawField(Player player1, Player player2,GameMode gameMode)
         {
             string rowLabels = "  1 2 3 4 5 6 7 8 9";
-            string header = "  attacker's Field".PadRight(24) + "  defender's Field";
+            string header = "  Player 1 Field".PadRight(24) + "  Player 2 Field";
 
             Console.Clear();
             Console.WriteLine(header);
             Console.WriteLine(rowLabels.PadRight(24) + rowLabels);
 
-            for (int i = 0; i < attackerField.Height; i++)
+            for (int i = 0; i < player1.field.Height; i++)
             {
                 char columnLabel = (char)('A' + i);
 
-                string attackerRow = GetRowWithLabels(attackerField, i, columnLabel, isDefender: false, visibleAreaPoint, visibleArea);
+                string player1Row = GetRowWithLabels(player1, i, columnLabel,gameMode,player1.isBot);
+                string player2Row = GetRowWithLabels(player2, i, columnLabel,gameMode, player2.isBot);
 
-                string defenderRow = GetRowWithLabels(defenderField, i, columnLabel, isDefender: true, visibleAreaPoint, visibleArea);
-
-                Console.WriteLine(attackerRow.PadRight(24) + defenderRow);
+                Console.WriteLine(player1Row.PadRight(24) + player2Row);
             }
         }
 
-        static string GetRowWithLabels(Field field, int rowIndex, char label, bool isDefender, (int x, int y) visibleAreaPoint, (int width, int heigth) visibleArea)
+        static string GetRowWithLabels(Player player, int rowIndex, char label,GameMode gameMode, bool isBot)
         {
             StringBuilder row = new StringBuilder();
             row.Append(label + " ");
 
-            for (int j = 0; j < field.GetMapLength(); j++)
+            for (int j = 0; j < player.field.GetMapLength(); j++)
             {
-                CellState cell = field.GetCell(rowIndex, j);
-                bool isCellVisible = IsDisplayedCell(rowIndex,j , isDefender, visibleAreaPoint, visibleArea);
-                row.Append(GetSymbole(cell, isCellVisible) + " ");  
+                CellState cell = player.field.GetCell(rowIndex, j);
+
+                bool isVisible = ShouldDisplayCell(gameMode,isBot);
+                row.Append(GetSymbol(cell, isVisible) + " ");
             }
 
             return row.ToString();
         }
-        static char GetSymbole(CellState cell, bool isVisible)
+
+        static char GetSymbol(CellState cell, bool isVisible)
         {
             return cell switch
             {
                 CellState.HasShip when !isVisible => '.',
-                CellState.HasShip => 'S',  
-                CellState.Empty => '.',  
-                CellState.Missed => '~', 
-                CellState.Hited => 'x',  
-                _ => ' '  
+                CellState.HasShip => 'S',
+                CellState.Empty => '.',
+                CellState.Missed => '~',
+                CellState.Hited => 'x',
+                _ => ' '
             };
         }
 
-        static bool IsDisplayedCell(int x, int y, bool isDefender, (int x, int y) visibleAreaPoint, (int width, int height) visibleArea)
+        static bool ShouldDisplayCell(GameMode gameMode,bool isBot)
         {
-            if (!isDefender) 
+            if(gameMode == GameMode.PVP)
             {
-                return true; 
-            }
-
-            if (visibleAreaPoint.x < 0 || visibleAreaPoint.y < 0)
                 return false;
-
-            if (visibleAreaPoint.x < 0 || visibleAreaPoint.y < 0)
+            }
+            else if(gameMode == GameMode.PVE && isBot == true)
+            {
+                return false;
+            }
+            else
             {
                 return true;
             }
-
-            bool isWithinVisibleArea =
-                x >= visibleAreaPoint.x &&
-                x < visibleAreaPoint.x + visibleArea.width &&
-                y >= visibleAreaPoint.y &&
-                y < visibleAreaPoint.y + visibleArea.height;
-
-            return isWithinVisibleArea;
         }
     }
 }

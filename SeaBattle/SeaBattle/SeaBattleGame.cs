@@ -35,17 +35,40 @@ class SeaBattleGame
     private Player _attacker;
     private Player _defender;
 
-    private int _transitionTime = 250;
+    private int _transitionTime = 1;
 
-    private (int weidth, int heigth) _radarArea = (3,3);
-    private (int x, int y) _radarPoint = (-1,-1);
-    private bool _usingRadar = false;
-
-    public SeaBattleGame()
-    {
-        _player2.isBot = true;
-    }
+    GameMode currentGameMode;
     public void GameProcess()
+    {
+        while (!HaveWinner())
+        {
+            GameLoop();
+        }
+
+        EndGame();
+    }
+
+    private void EndGame()
+    {
+        Player winner = GetMainWinner();
+
+        Console.WriteLine("Остаточно переміг гравець" + winner.nickName);
+        Console.WriteLine("Кількість перемог у цього гравця:" + winner.wins);
+    }
+
+    private Player GetMainWinner()
+    {
+        if (_player1.wins >= 3)
+            return _player1;
+        else
+            return _player2;
+    }
+
+    private bool HaveWinner()
+    {
+        return _player1.wins >= 3 || _player2.wins >= 3;
+    }
+    public void GameLoop()
     {
         Initialization();
         Draw();
@@ -57,7 +80,7 @@ class SeaBattleGame
             Draw();
         }
 
-        EndGame();
+        EndGameLoop();
     }
 
     private void Initialization()
@@ -68,7 +91,7 @@ class SeaBattleGame
     private void Start()
     {
         SetRoles();
-        SetGameMode(GameMode.PVP);
+        SetGameMode(GameMode.PVE);
     }
     private void SetRoles()
     {
@@ -86,7 +109,7 @@ class SeaBattleGame
     }
     private void Draw()
     {
-        FieldRender.DrawField(_attacker.field, _defender.field,_radarPoint, _radarArea);
+        FieldRender.DrawField(_player1,_player2,currentGameMode);
     }
     private bool IsEndGame()
     {
@@ -98,7 +121,7 @@ class SeaBattleGame
     }
     private void ShootLogic()
     {
-        if (_usingRadar)
+        if (_attacker.usingRadar)
         {
             TransitionVisual();
             return;
@@ -129,14 +152,26 @@ class SeaBattleGame
            (_defender, _attacker) = (_attacker, _defender);
         }
     }
-    private void EndGame()
+    private void EndGameLoop()
     {
         Console.WriteLine("Гру завершено!" + "Кількість палуб ,що залишилась:" + "Гравець один:" + _player1.HP + "Гравець два:" + _player2.HP);
+
+        GetWinner().Win();
+        Console.WriteLine("Кількість перемог" + "Гравець один:" + _player1.HP + "Гравець два" + _player2.HP);
+
+        TransitionVisual();
+    }
+    private Player GetWinner()
+    {
+        if (_player1.HP == 0)
+            return _player1;
+        else
+            return _player2;
     }
     private void InputProcess()
     {
-        _radarPoint = (-1, -1);
-        _usingRadar = false;
+        _attacker.radarPoint = (-1, -1);
+        _attacker.usingRadar = false;
         if (_attacker.isBot == false)
         {
             (int x, int y, Action action) input = GetInput();
@@ -149,8 +184,8 @@ class SeaBattleGame
             else if(input.action == Action.Radar && _attacker.radarsCount > 0)
             {
                 _actionPoint = (-1, -1);
-                _radarPoint = (input.x, input.y);
-                _usingRadar = true;
+                _attacker.radarPoint = (input.x, input.y);
+                _attacker.usingRadar = true;
                 _attacker.UseRadar();
             }
         }
@@ -204,6 +239,8 @@ class SeaBattleGame
 
     private void SetGameMode(GameMode mode)
     {
+        currentGameMode = mode;
+
         switch (mode)
         {
             case GameMode.PVP:
