@@ -35,40 +35,12 @@ class SeaBattleGame
     private Player _attacker;
     private Player _defender;
 
-    private int _transitionTime = 1;
+    private int _transitionTime = 250;
 
     GameMode currentGameMode;
+
+    FieldRender _fieldRender = new FieldRender();
     public void GameProcess()
-    {
-        while (!HaveWinner())
-        {
-            GameLoop();
-        }
-
-        EndGame();
-    }
-
-    private void EndGame()
-    {
-        Player winner = GetMainWinner();
-
-        Console.WriteLine("Остаточно переміг гравець" + winner.nickName);
-        Console.WriteLine("Кількість перемог у цього гравця:" + winner.wins);
-    }
-
-    private Player GetMainWinner()
-    {
-        if (_player1.wins >= 3)
-            return _player1;
-        else
-            return _player2;
-    }
-
-    private bool HaveWinner()
-    {
-        return _player1.wins >= 3 || _player2.wins >= 3;
-    }
-    public void GameLoop()
     {
         Initialization();
         Draw();
@@ -91,7 +63,12 @@ class SeaBattleGame
     private void Start()
     {
         SetRoles();
-        SetGameMode(GameMode.PVE);
+        SetGameMode(GameMode.PVP);
+        SetRenderInfo();
+    }
+    private void SetRenderInfo()
+    {
+        _fieldRender.SetInfo(_player1, _player2, currentGameMode);
     }
     private void SetRoles()
     {
@@ -109,7 +86,7 @@ class SeaBattleGame
     }
     private void Draw()
     {
-        FieldRender.DrawField(_player1,_player2,currentGameMode);
+        _fieldRender.DrawField();
     }
     private bool IsEndGame()
     {
@@ -155,9 +132,6 @@ class SeaBattleGame
     private void EndGameLoop()
     {
         Console.WriteLine("Гру завершено!" + "Кількість палуб ,що залишилась:" + "Гравець один:" + _player1.HP + "Гравець два:" + _player2.HP);
-
-        GetWinner().Win();
-        Console.WriteLine("Кількість перемог" + "Гравець один:" + _player1.HP + "Гравець два" + _player2.HP);
 
         TransitionVisual();
     }

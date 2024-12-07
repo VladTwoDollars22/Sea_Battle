@@ -1,10 +1,23 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 
 namespace SeaBattle
 {
-    static class FieldRender
+    public class FieldRender
     {
-        public static void DrawField(Player player1, Player player2,GameMode gameMode)
+        static Player _player1;
+        static Player _player2;
+
+        static GameMode _gameMode; 
+
+        public void SetInfo(Player player1, Player player2, GameMode gameMode)
+        {
+            _player1 = player1;
+            _player2 = player2;
+
+            _gameMode = gameMode;
+        }
+        public void DrawField()
         {
             string rowLabels = "  1 2 3 4 5 6 7 8 9";
             string header = "  Player 1 Field".PadRight(24) + "  Player 2 Field";
@@ -13,34 +26,40 @@ namespace SeaBattle
             Console.WriteLine(header);
             Console.WriteLine(rowLabels.PadRight(24) + rowLabels);
 
-            for (int i = 0; i < player1.field.Height; i++)
+            for (int i = 0; i < _player1.field.Height; i++)
             {
                 char columnLabel = (char)('A' + i);
 
-                string player1Row = GetRowWithLabels(player1, i, columnLabel,gameMode,player1.isBot);
-                string player2Row = GetRowWithLabels(player2, i, columnLabel,gameMode, player2.isBot);
+                string player1Row = GetRowWithLabels(_player1,_player2, i, columnLabel,ShouldDisplayCell(_gameMode, _player1.isBot));
+                string player2Row = GetRowWithLabels(_player2,_player1, i, columnLabel, ShouldDisplayCell(_gameMode, _player2.isBot));
 
                 Console.WriteLine(player1Row.PadRight(24) + player2Row);
             }
         }
 
-        static string GetRowWithLabels(Player player, int rowIndex, char label,GameMode gameMode, bool isBot)
+        private string GetRowWithLabels(Player deffender,Player attacker, int rowIndex, char label,bool isVisible)
         {
             StringBuilder row = new StringBuilder();
             row.Append(label + " ");
 
-            for (int j = 0; j < player.field.GetMapLength(); j++)
+            for (int j = 0; j < deffender.field.GetMapLength(); j++)
             {
-                CellState cell = player.field.GetCell(rowIndex, j);
+                bool IsVisible = isVisible;
 
-                bool isVisible = ShouldDisplayCell(gameMode,isBot);
-                row.Append(GetSymbol(cell, isVisible) + " ");
+                if (CellInArea(attacker, rowIndex, j))
+                {
+                    IsVisible = true;
+                }
+
+                CellState cell = deffender.field.GetCell(rowIndex, j);
+
+                row.Append(GetSymbol(cell, IsVisible) + " ");
             }
 
             return row.ToString();
         }
 
-        static char GetSymbol(CellState cell, bool isVisible)
+        private char GetSymbol(CellState cell, bool isVisible)
         {
             return cell switch
             {
@@ -53,7 +72,7 @@ namespace SeaBattle
             };
         }
 
-        static bool ShouldDisplayCell(GameMode gameMode,bool isBot)
+        private bool ShouldDisplayCell(GameMode gameMode,bool isBot)
         {
             if(gameMode == GameMode.PVP)
             {
@@ -68,5 +87,23 @@ namespace SeaBattle
                 return true;
             }
         }
+        public bool CellInArea(Player player, int pointX, int pointY)
+        {
+            (int x, int y) = player.radarPoint;
+            (int width, int height) = player.radarArea;
+
+            if (x == -1 || y == -1)
+            {
+                return false;
+            }
+
+            int left = x;
+            int right = x + width - 1;
+            int top = y;
+            int bottom = y + height - 1;
+
+            return pointX >= left && pointX <= right && pointY >= top && pointY <= bottom;
+        }
+
     }
 }

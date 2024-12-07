@@ -109,7 +109,7 @@
 
             return (x, y);
         }
-        public void EditCell((int x,int y) point,CellState newState)
+        public void EditCell((int x, int y) point, CellState newState)
         {
             Map[point.x, point.y] = newState;
         }
@@ -140,7 +140,7 @@
             return (x, y);
         }
 
-        public CellState GetCell(int x,int y)
+        public CellState GetCell(int x, int y)
         {
             return Map[x, y];
         }
@@ -149,5 +149,6 @@
         {
             return Map.GetLength(1);
         }
+
     }
 }
