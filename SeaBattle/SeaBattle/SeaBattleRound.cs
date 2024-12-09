@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using SeaBattle;
+﻿using SeaBattle;
 public enum CellState
 {
     Empty,
@@ -25,7 +24,14 @@ public enum Action
     Radar,
     None,
 }
-class SeaBattleGame   
+
+public enum RoundResult
+{
+    Player1Win,
+    Player2Win,
+    Draw,
+}
+class SeaBattleRound   
 {
     private Player _player1 = new Player();
     private Player _player2 = new Player();
@@ -134,6 +140,11 @@ class SeaBattleGame
         Console.WriteLine("Гру завершено!" + "Кількість палуб ,що залишилась:" + "Гравець один:" + _player1.HP + "Гравець два:" + _player2.HP);
 
         TransitionVisual();
+    }
+
+    private void EndVisual()
+    {
+
     }
     private Player GetWinner()
     {

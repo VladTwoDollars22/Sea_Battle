@@ -4,7 +4,7 @@
     {
         static void Main(string[] args)
         {
-            SeaBattleGame game = new SeaBattleGame();
+            SeaBattleRound game = new SeaBattleRound();
             game.GameProcess();
         }
     }
