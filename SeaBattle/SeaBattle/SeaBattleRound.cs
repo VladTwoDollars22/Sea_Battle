@@ -33,19 +33,27 @@ public enum RoundResult
 }
 class SeaBattleRound   
 {
-    private Player _player1 = new Player();
-    private Player _player2 = new Player();
+    private Player _player1 = new Player("Aboba");
+    private Player _player2 = new Player("Babay");
 
     private (int x, int y) _actionPoint;
 
     private Player _attacker;
     private Player _defender;
 
-    private int _transitionTime = 250;
+    private int _transitionTime = 1;
 
     GameMode currentGameMode;
 
     FieldRender _fieldRender = new FieldRender();
+
+    private RoundResult _roundResult;
+    public RoundResult GetRoundResult() => _roundResult;
+
+    public SeaBattleRound(GameMode gameMode)
+    {
+        currentGameMode = gameMode;
+    }
     public void GameProcess()
     {
         Initialization();
@@ -69,7 +77,7 @@ class SeaBattleRound
     private void Start()
     {
         SetRoles();
-        SetGameMode(GameMode.PVP);
+        SetGameMode();
         SetRenderInfo();
     }
     private void SetRenderInfo()
@@ -137,21 +145,35 @@ class SeaBattleRound
     }
     private void EndGameLoop()
     {
+        GameEndVisual();
+
+        CalculateRoundResult();
+    }
+
+    private void GameEndVisual()
+    {
         Console.WriteLine("Гру завершено!" + "Кількість палуб ,що залишилась:" + "Гравець один:" + _player1.HP + "Гравець два:" + _player2.HP);
 
         TransitionVisual();
     }
 
-    private void EndVisual()
+    private void CalculateRoundResult()
     {
+        Player winner = GetWinner();
 
+        if (winner == _player1)
+            _roundResult = RoundResult.Player1Win;
+        else if (winner == _player2)
+            _roundResult = RoundResult.Player2Win;
+        else
+            _roundResult = RoundResult.Draw;
     }
     private Player GetWinner()
     {
         if (_player1.HP == 0)
-            return _player1;
-        else
             return _player2;
+        else
+            return _player1;
     }
     private void InputProcess()
     {
@@ -222,11 +244,9 @@ class SeaBattleRound
         }
     }
 
-    private void SetGameMode(GameMode mode)
+    private void SetGameMode()
     {
-        currentGameMode = mode;
-
-        switch (mode)
+        switch (currentGameMode)
         {
             case GameMode.PVP:
                 _player1.isBot = false;

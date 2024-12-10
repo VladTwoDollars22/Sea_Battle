@@ -4,8 +4,8 @@
     {
         static void Main(string[] args)
         {
-            SeaBattleRound game = new SeaBattleRound();
-            game.GameProcess();
+            SeaBattleGame game = new SeaBattleGame();
+            game.StartGame();
         }
     }
 }

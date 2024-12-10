@@ -14,7 +14,7 @@
         public (int x,int y) radarPoint;
         public int radarsCount;
 
-        public Player()
+        public Player(string NickName)
         {
             radarsCount = 1;
             radarPoint = (-1, -1);
@@ -25,6 +25,8 @@
             ships = new List<int> {4,3,3,2,2,2,1,1,1,1};
 
             HP = ships.Sum();
+
+            nickName = NickName;
         }
 
         public void TakeDamage(int damage)
