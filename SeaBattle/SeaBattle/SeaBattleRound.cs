@@ -33,25 +33,32 @@ public enum RoundResult
 }
 class SeaBattleRound   
 {
-    private Player _player1 = new Player("Aboba");
-    private Player _player2 = new Player("Babay");
+    private Player _player1;
+    private Player _player2;
 
     private (int x, int y) _actionPoint;
 
     private Player _attacker;
     private Player _defender;
 
-    private int _transitionTime = 1;
+    private int _transitionTime;
 
     GameMode currentGameMode;
 
-    FieldRender _fieldRender = new FieldRender();
+    FieldRender _fieldRender;
 
     private RoundResult _roundResult;
     public RoundResult GetRoundResult() => _roundResult;
 
-    public SeaBattleRound(GameMode gameMode)
+    public SeaBattleRound(GameMode gameMode,Player player1,Player player2)
     {
+        _transitionTime = 1;
+
+        _fieldRender = new FieldRender();
+
+        _player1 = player1;
+        _player2 = player2;
+
         currentGameMode = gameMode;
     }
     public void GameProcess()

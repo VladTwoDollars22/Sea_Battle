@@ -38,7 +38,7 @@
         {
             radarsCount--;
         }
-        public void Regenerate()
+        public void Reset()
         {
             HP = ships.Sum();
         }
