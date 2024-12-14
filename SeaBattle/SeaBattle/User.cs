@@ -5,11 +5,11 @@ namespace SeaBattle
 {
     public class User
     {
-        public string NickName { get; set; }
-        public int Wins { get; set; }
-        public int Losses { get; set; }
-        public int TotalWins { get; set; }
-        public int TotalLosses { get; set; }
+        public string NickName;
+        public int Wins;
+        public int Losses;
+        public int TotalWins;
+        public int TotalLosses;
 
         [JsonIgnore]
         private string filePath;
@@ -32,8 +32,6 @@ namespace SeaBattle
         private User LoadUser(string fileName, string nickName)
         {
             string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
-            Console.WriteLine(filePath);
-            Thread.Sleep(3000);
 
             if (File.Exists(filePath))
             {
