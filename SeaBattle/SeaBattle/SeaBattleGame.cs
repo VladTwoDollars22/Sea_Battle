@@ -1,15 +1,54 @@
 ﻿namespace SeaBattle
 {
+    public struct Player
+    {
+        public Profile Profile;
+
+        public int RoundWins;
+
+        public PlayerController PlayerController;
+        public Player(string NickName)
+        {
+            Profile = new Profile(NickName);
+            RoundWins = 0;
+
+            PlayerController = new PlayerController();
+        }
+        public void LoadProfileData()
+        {
+            Profile.Initialize();
+        }
+        public void SaveProfileData()
+        {
+            Profile.Save();
+        }
+        public void RoundWin()
+        {
+            RoundWins++;
+            Profile.RoundWins++;
+        }
+        public void RoundLoss()
+        {
+            Profile.RoundLosses++;
+        }
+        public void Win()
+        {
+            Profile.Wins++;
+        }
+        public void Lose()
+        {
+            Profile.Losses++;
+        }
+        public void ResetPlayerController()
+        {
+            PlayerController.Reset();
+        }
+        
+    }
     public class SeaBattleGame
     {
-        private User _user1 = new("Chupa","user1");
-        private User _user2 = new("Pupc","user2");
-
-        private Player _player1;
-        private Player _player2;
-
-        private int _player1Wins = 0;
-        private int _player2Wins = 0;
+        private Player _player1 = new("Chupa");
+        private Player _player2 = new("Pupc");
 
         private int _winsTriggerCount = 3;
 
@@ -27,11 +66,11 @@
         }
         private bool HaveWinner()
         {
-            return _player1Wins >= _winsTriggerCount || _player2Wins >= _winsTriggerCount;
+            return _player1.RoundWins >= _winsTriggerCount || _player2.RoundWins >= _winsTriggerCount;
         }
         private void RoundProcess()
         {
-            SeaBattleRound round = new(gameMode,_player1,_player2);
+            SeaBattleRound round = new(gameMode,_player1.PlayerController,_player2.PlayerController);
             round.GameProcess();
             RoundResult result = round.GetRoundResult();
             CalculateRoundWinner(result);
@@ -39,22 +78,20 @@
         }
         private void ResetPlayers()
         {
-            _player1.Reset();
-            _player2.Reset();
+            _player1.ResetPlayerController();
+            _player2.ResetPlayerController();
         }
         private void CalculateRoundWinner(RoundResult result)
         {
             if (result == RoundResult.Player1Win)
             {
-                _player1Wins++;
-                _user1.Wins++;
-                _user2.Losses++;
+                _player1.RoundWin();
+                _player2.RoundLoss();
             }       
             if (result == RoundResult.Player2Win)
             {
-                _player2Wins++;
-                _user2.Wins++;
-                _user1.Losses++;
+                _player2.RoundWin();
+                _player1.RoundLoss();
             }
                 
         }
@@ -66,42 +103,36 @@
         }
         private void CalculateTotalWinner()
         {
-            if (_player1Wins >= _winsTriggerCount)
+            if (_player1.RoundWins >= _winsTriggerCount)
             {
-                _user1.TotalWins++;
-                _user2.TotalLosses++;
+                _player1.Win();
+                _player2.Lose();
             }
             else
             {
-                _user1.TotalLosses++;
-                _user2.TotalWins++;
+                _player1.Lose();
+                _player2.Win();
             }
         }
         private void SaveUsersData()
         {
-            _user1.Save();
-            _user2.Save();
+            _player1.SaveProfileData();
+            _player2.SaveProfileData();
         }
         private void EndVisual()
         {
             Console.WriteLine("Кількість перемoг у гравців:");
-            Console.WriteLine("Гравець 1:" + _player1Wins);
-            Console.WriteLine("Гравець 2:" + _player2Wins);
+            Console.WriteLine("Гравець 1:" + _player1.RoundWins);
+            Console.WriteLine("Гравець 2:" + _player2.RoundWins);
         }
         private void Initialization()
         {
             InitializateUsers();
-            CreatePlayers();
         }
         private void InitializateUsers()
         {
-            _user1.Initialize("user1",_user1.NickName);
-            _user2.Initialize("user2", _user2.NickName);
-        }
-        private void CreatePlayers()
-        {
-            _player1 = new Player(_user1.NickName);
-            _player2 = new Player(_user2.NickName);
+            _player1.LoadProfileData();
+            _player2.LoadProfileData();
         }
     }
 }

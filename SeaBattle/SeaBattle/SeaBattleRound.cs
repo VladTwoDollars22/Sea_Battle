@@ -33,13 +33,13 @@ public enum RoundResult
 }
 class SeaBattleRound   
 {
-    private Player _player1;
-    private Player _player2;
+    private PlayerController _player1;
+    private PlayerController _player2;
 
     private (int x, int y) _actionPoint;
 
-    private Player _attacker;
-    private Player _defender;
+    private PlayerController _attacker;
+    private PlayerController _defender;
 
     private int _transitionTime;
 
@@ -50,7 +50,7 @@ class SeaBattleRound
     private RoundResult _roundResult;
     public RoundResult GetRoundResult() => _roundResult;
 
-    public SeaBattleRound(GameMode gameMode,Player player1,Player player2)
+    public SeaBattleRound(GameMode gameMode,PlayerController player1,PlayerController player2)
     {
         _transitionTime = 1;
 
@@ -166,7 +166,7 @@ class SeaBattleRound
 
     private void CalculateRoundResult()
     {
-        Player winner = GetWinner();
+        PlayerController winner = GetWinner();
 
         if (winner == _player1)
             _roundResult = RoundResult.Player1Win;
@@ -175,7 +175,7 @@ class SeaBattleRound
         else
             _roundResult = RoundResult.Draw;
     }
-    private Player GetWinner()
+    private PlayerController GetWinner()
     {
         if (_player1.HP == 0)
             return _player2;

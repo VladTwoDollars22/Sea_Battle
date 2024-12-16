@@ -1,8 +1,7 @@
 ﻿namespace SeaBattle
 {
-    public class Player
+    public class PlayerController
     {
-        public string nickName;
         public bool isBot;
         public Field field;
         public List<int> ships;
@@ -14,7 +13,7 @@
         public (int x,int y) radarPoint;
         public int radarsCount;
 
-        public Player(string NickName)
+        public PlayerController()
         {
             radarsCount = 1;
             radarPoint = (-1, -1);
@@ -25,8 +24,6 @@
             ships = new List<int> {4,3,3,2,2,2,1,1,1,1};
 
             HP = ships.Sum();
-
-            nickName = NickName;
         }
 
         public void TakeDamage(int damage)

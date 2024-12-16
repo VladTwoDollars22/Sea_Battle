@@ -5,12 +5,12 @@ namespace SeaBattle
 {
     public class FieldRender
     {
-        static Player _player1;
-        static Player _player2;
+        static PlayerController _player1;
+        static PlayerController _player2;
 
         static GameMode _gameMode; 
 
-        public void SetInfo(Player player1, Player player2, GameMode gameMode)
+        public void SetInfo(PlayerController player1, PlayerController player2, GameMode gameMode)
         {
             _player1 = player1;
             _player2 = player2;
@@ -20,7 +20,7 @@ namespace SeaBattle
         public void DrawField()
         {
             string rowLabels = "  1 2 3 4 5 6 7 8 9";
-            string header = "  Player 1 Field".PadRight(24) + "  Player 2 Field";
+            string header = "  " + "_player1.nickName" + " Field".PadRight(24) + "  " + "_player2.nickName" + " Field";
 
             Console.Clear();
             Console.WriteLine(header);
@@ -37,7 +37,7 @@ namespace SeaBattle
             }
         }
 
-        private string GetRowWithLabels(Player deffender,Player attacker, int rowIndex, char label,bool isVisible)
+        private string GetRowWithLabels(PlayerController deffender,PlayerController attacker, int rowIndex, char label,bool isVisible)
         {
             StringBuilder row = new StringBuilder();
             row.Append(label + " ");
@@ -87,7 +87,7 @@ namespace SeaBattle
                 return true;
             }
         }
-        public bool CellInArea(Player player, int pointX, int pointY)
+        public bool CellInArea(PlayerController player, int pointX, int pointY)
         {
             (int x, int y) = player.radarPoint;
             (int width, int height) = player.radarArea;
