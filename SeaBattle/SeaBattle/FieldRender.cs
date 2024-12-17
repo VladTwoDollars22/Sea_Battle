@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace SeaBattle
 {
@@ -7,8 +6,10 @@ namespace SeaBattle
     {
         static SeaBattlePlayerController _player1;
         static SeaBattlePlayerController _player2;
+        static GameMode _gameMode;
 
-        static GameMode _gameMode; 
+        private int _fieldWidth;
+        private int _fieldHeight;
 
         public void SetInfo(SeaBattlePlayerController player1, SeaBattlePlayerController player2, GameMode gameMode)
         {
@@ -16,44 +17,47 @@ namespace SeaBattle
             _player2 = player2;
 
             _gameMode = gameMode;
+            _fieldWidth = player1.fieldSize.width;
+            _fieldHeight = player1.fieldSize.height;
         }
+
         public void DrawField()
         {
-            string rowLabels = "  1 2 3 4 5 6 7 8 9";
-            string header = "  " + _player1.NickName + " Field".PadRight(24) + "  " + _player2.NickName + " Field";
+            string rowLabels = "  " + string.Join(" ", Enumerable.Range(1, _fieldWidth));
+            string header = "  " + _player1.NickName.PadRight(24) + "  " + _player2.NickName;
 
             Console.Clear();
             Console.WriteLine(header);
             Console.WriteLine(rowLabels.PadRight(24) + rowLabels);
 
-            for (int i = 0; i < _player1.field.Height; i++)
+            for (int i = 0; i < _fieldHeight; i++)
             {
                 char columnLabel = (char)('A' + i);
 
-                string player1Row = GetRowWithLabels(_player1,_player2, i, columnLabel,ShouldDisplayCell(_gameMode, _player1.isBot));
-                string player2Row = GetRowWithLabels(_player2,_player1, i, columnLabel, ShouldDisplayCell(_gameMode, _player2.isBot));
+                string player1Row = GetRowWithLabels(_player1, _player2, i, columnLabel, ShouldDisplayCell(_gameMode, _player1.isBot));
+                string player2Row = GetRowWithLabels(_player2, _player1, i, columnLabel, ShouldDisplayCell(_gameMode, _player2.isBot));
 
                 Console.WriteLine(player1Row.PadRight(24) + player2Row);
             }
         }
 
-        private string GetRowWithLabels(SeaBattlePlayerController deffender,SeaBattlePlayerController attacker, int rowIndex, char label,bool isVisible)
+        private string GetRowWithLabels(SeaBattlePlayerController defender, SeaBattlePlayerController attacker, int rowIndex, char label, bool isVisible)
         {
             StringBuilder row = new StringBuilder();
             row.Append(label + " ");
 
-            for (int j = 0; j < deffender.field.GetMapLength(); j++)
+            for (int j = 0; j < _fieldWidth; j++)
             {
-                bool IsVisible = isVisible;
+                bool isCellVisible = isVisible;
 
                 if (CellInArea(attacker, rowIndex, j))
                 {
-                    IsVisible = true;
+                    isCellVisible = true;
                 }
 
-                CellState cell = deffender.field.GetCell(rowIndex, j);
+                CellState cell = defender.field.GetCell(rowIndex, j);
 
-                row.Append(GetSymbol(cell, IsVisible) + " ");
+                row.Append(GetSymbol(cell, isCellVisible) + " ");
             }
 
             return row.ToString();
@@ -72,13 +76,13 @@ namespace SeaBattle
             };
         }
 
-        private bool ShouldDisplayCell(GameMode gameMode,bool isBot)
+        private bool ShouldDisplayCell(GameMode gameMode, bool isBot)
         {
-            if(gameMode == GameMode.PVP)
+            if (gameMode == GameMode.PVP)
             {
                 return false;
             }
-            else if(gameMode == GameMode.PVE && isBot == true)
+            else if (gameMode == GameMode.PVE && isBot)
             {
                 return false;
             }
@@ -87,6 +91,7 @@ namespace SeaBattle
                 return true;
             }
         }
+
         public bool CellInArea(SeaBattlePlayerController player, int pointX, int pointY)
         {
             (int x, int y) = player.radarPoint;
@@ -104,6 +109,5 @@ namespace SeaBattle
 
             return pointX >= left && pointX <= right && pointY >= top && pointY <= bottom;
         }
-
     }
 }

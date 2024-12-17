@@ -14,6 +14,8 @@
         public (int x,int y) radarPoint;
         public int radarsCount;
 
+        public (int width, int height) fieldSize;
+
         public SeaBattlePlayerController(string nickName)
         {
             NickName = nickName;
@@ -21,7 +23,8 @@
             radarPoint = (-1, -1);
             radarArea = (3, 3);
 
-            field = new Field(9, 9);
+            fieldSize = (9, 9);
+            field = new Field(fieldSize.width,fieldSize.height);
 
             ships = new List<int> {4,3,3,2,2,2,1,1,1,1};
 
