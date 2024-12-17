@@ -1,6 +1,6 @@
 ﻿namespace SeaBattle
 {
-    public class PlayerController
+    public class SeaBattlePlayerController
     {
         public string NickName;
         public bool isBot;
@@ -14,7 +14,7 @@
         public (int x,int y) radarPoint;
         public int radarsCount;
 
-        public PlayerController(string nickName)
+        public SeaBattlePlayerController(string nickName)
         {
             NickName = nickName;
             radarsCount = 1;

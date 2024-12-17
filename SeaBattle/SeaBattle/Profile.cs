@@ -12,9 +12,12 @@ namespace SeaBattle
         public int Losses;
 
         [JsonIgnore]
-        private string filePath;
+        private string _filePath;
 
-        private JsonSerializerOptions _options = new JsonSerializerOptions { WriteIndented = true, IncludeFields = true };
+        private JsonSerializerOptions _options;
+
+        private string _profilesDirectoryPath;
+
         public Profile() { }
 
         public Profile(string nickName)
@@ -24,22 +27,28 @@ namespace SeaBattle
             RoundLosses = 0;
             Wins = 0;
             Losses = 0;
-            filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, NickName);
+
+            _options = new JsonSerializerOptions { WriteIndented = true, IncludeFields = true };
+
+            _profilesDirectoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles");
+            _filePath = Path.Combine(_profilesDirectoryPath, $"{NickName}.json");
         }
         public void Initialize()
         {
+            EnsureProfilesDirectory();
             Profile user = LoadUser();
             LoadStatistics(user);
         }
+
         private Profile LoadUser()
         {
-            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, NickName);
+            _filePath = Path.Combine(_profilesDirectoryPath, $"{NickName}.json");
 
-            if (File.Exists(filePath))
+            if (File.Exists(_filePath))
             {
-                string json = File.ReadAllText(filePath);
+                string json = File.ReadAllText(_filePath);
                 var user = JsonSerializer.Deserialize<Profile>(json, _options);
-                user.filePath = filePath;
+                user._filePath = _filePath;
                 return user;
             }
 
@@ -47,6 +56,7 @@ namespace SeaBattle
             newUser.Save();
             return newUser;
         }
+
         private void LoadStatistics(Profile user)
         {
             if (user.NickName != null)
@@ -56,10 +66,20 @@ namespace SeaBattle
             Wins = user.Wins;
             Losses = user.Losses;
         }
+
         public void Save()
         {
+            EnsureProfilesDirectory();
             string json = JsonSerializer.Serialize(this, _options);
-            File.WriteAllText(filePath, json);
+            File.WriteAllText(_filePath, json);
+        }
+
+        private void EnsureProfilesDirectory()
+        {
+            if (!Directory.Exists(_profilesDirectoryPath))
+            {
+                Directory.CreateDirectory(_profilesDirectoryPath);
+            }
         }
     }
 }

@@ -8,10 +8,10 @@
         private int _winsTriggerCount;
 
         private GameMode _gameMode;
-        public SeaBattleGame(Player player1,Player player2,GameMode gameMode)
+        public SeaBattleGame(string filename1,string filename2,GameMode gameMode)
         {
-            _player1 = player1;
-            _player2 = player2;
+            _player1 = new Player(filename1);
+            _player2 = new Player(filename2);
 
             _winsTriggerCount = 3;
 
@@ -105,13 +105,13 @@
 
         public int RoundWins;
 
-        public PlayerController PlayerController;
-        public Player(string NickName)
+        public SeaBattlePlayerController PlayerController;
+        public Player(string filename)
         {
-            Profile = new Profile(NickName);
+            Profile = new Profile(filename);
             RoundWins = 0;
 
-            PlayerController = new PlayerController(NickName);
+            PlayerController = new SeaBattlePlayerController(Profile.NickName);
         }
         public void LoadProfileData()
         {
@@ -142,6 +142,8 @@
         {
             PlayerController.Reset();
         }
-
     }
+
 }
+
+
