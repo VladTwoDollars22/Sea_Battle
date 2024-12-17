@@ -4,8 +4,8 @@
     {
         static SeaBattleGame game;
 
-        static string profile1;
-        static string profile2;
+        static Profile profile1;
+        static Profile profile2;
 
         static GameMode gameMode = GameMode.EVE;
 
@@ -24,7 +24,7 @@
         }
         static bool ProfilesReceived()
         {
-            return !(string.IsNullOrEmpty(profile1) || string.IsNullOrEmpty(profile2));
+            return !(profile1 == null || profile2 == null);
         }
         static void Initialization()
         {
@@ -43,15 +43,15 @@
         }
         static void SetProfile()
         {
-            if( string.IsNullOrEmpty(profile1))
+            if( profile1 == null)
             {
-                profile1 = input;
+                profile1 = new Profile(input);
                 Console.WriteLine("Перший профіль обрано!");
                 Thread.Sleep(2000);
             }
             else
             {
-                if (profile1 == input)
+                if (profile1.NickName == input)
                 {
                     Console.WriteLine("Цей профіль уже був обраний");
                     Thread.Sleep(2000);
@@ -59,7 +59,7 @@
                 }
                     
 
-                profile2 = input;
+                profile2 = new Profile(input);
             }
         }
         static void InputProcess()
