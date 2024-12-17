@@ -1,58 +1,22 @@
 ﻿namespace SeaBattle
 {
-    public struct Player
-    {
-        public Profile Profile;
-
-        public int RoundWins;
-
-        public PlayerController PlayerController;
-        public Player(string NickName)
-        {
-            Profile = new Profile(NickName);
-            RoundWins = 0;
-
-            PlayerController = new PlayerController();
-        }
-        public void LoadProfileData()
-        {
-            Profile.Initialize();
-        }
-        public void SaveProfileData()
-        {
-            Profile.Save();
-        }
-        public void RoundWin()
-        {
-            RoundWins++;
-            Profile.RoundWins++;
-        }
-        public void RoundLoss()
-        {
-            Profile.RoundLosses++;
-        }
-        public void Win()
-        {
-            Profile.Wins++;
-        }
-        public void Lose()
-        {
-            Profile.Losses++;
-        }
-        public void ResetPlayerController()
-        {
-            PlayerController.Reset();
-        }
-        
-    }
     public class SeaBattleGame
     {
-        private Player _player1 = new("Chupa");
-        private Player _player2 = new("Pupc");
+        private Player _player1;
+        private Player _player2;
 
-        private int _winsTriggerCount = 3;
+        private int _winsTriggerCount;
 
-        private GameMode gameMode = GameMode.EVE;
+        private GameMode _gameMode;
+        public SeaBattleGame(Player player1,Player player2,GameMode gameMode)
+        {
+            _player1 = player1;
+            _player2 = player2;
+
+            _winsTriggerCount = 3;
+
+            _gameMode = gameMode;
+        }
         public void StartGame()
         {
             Initialization();
@@ -70,7 +34,7 @@
         }
         private void RoundProcess()
         {
-            SeaBattleRound round = new(gameMode,_player1.PlayerController,_player2.PlayerController);
+            SeaBattleRound round = new(_gameMode,_player1.PlayerController,_player2.PlayerController);
             round.GameProcess();
             RoundResult result = round.GetRoundResult();
             CalculateRoundWinner(result);
@@ -134,5 +98,50 @@
             _player1.LoadProfileData();
             _player2.LoadProfileData();
         }
+    }
+    public struct Player
+    {
+        public Profile Profile;
+
+        public int RoundWins;
+
+        public PlayerController PlayerController;
+        public Player(string NickName)
+        {
+            Profile = new Profile(NickName);
+            RoundWins = 0;
+
+            PlayerController = new PlayerController(NickName);
+        }
+        public void LoadProfileData()
+        {
+            Profile.Initialize();
+        }
+        public void SaveProfileData()
+        {
+            Profile.Save();
+        }
+        public void RoundWin()
+        {
+            RoundWins++;
+            Profile.RoundWins++;
+        }
+        public void RoundLoss()
+        {
+            Profile.RoundLosses++;
+        }
+        public void Win()
+        {
+            Profile.Wins++;
+        }
+        public void Lose()
+        {
+            Profile.Losses++;
+        }
+        public void ResetPlayerController()
+        {
+            PlayerController.Reset();
+        }
+
     }
 }

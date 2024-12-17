@@ -20,7 +20,7 @@ namespace SeaBattle
         public void DrawField()
         {
             string rowLabels = "  1 2 3 4 5 6 7 8 9";
-            string header = "  " + "_player1.nickName" + " Field".PadRight(24) + "  " + "_player2.nickName" + " Field";
+            string header = "  " + _player1.NickName + " Field".PadRight(24) + "  " + _player2.NickName + " Field";
 
             Console.Clear();
             Console.WriteLine(header);

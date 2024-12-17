@@ -2,6 +2,7 @@
 {
     public class PlayerController
     {
+        public string NickName;
         public bool isBot;
         public Field field;
         public List<int> ships;
@@ -13,8 +14,9 @@
         public (int x,int y) radarPoint;
         public int radarsCount;
 
-        public PlayerController()
+        public PlayerController(string nickName)
         {
+            NickName = nickName;
             radarsCount = 1;
             radarPoint = (-1, -1);
             radarArea = (3, 3);
